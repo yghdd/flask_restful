@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+</head>
+<body>
+<form>
+    <input name="name" placeholder="用户名" ><br>
+
+    <button type="button", onclick="addUser()">添加</button>
+</form>
+<h3>查询用户</h3>
+<input id="searchKey" placeholder="输入">
+<button type="button" onclick="searchUser(searchKey.value)">查询</button>
+<hr>
+<div id="updateDiv">
+    <h3>变更用户</h3>
+    <form id="updataForm">
+        <input name="id" type="hidden">
+        <input name="name" >
+        <button type="button" onclick="putUser()">提交</button>
+    </form>
+</div>
+<div>
+    <ul id="userData"></ul>
+</div>
+<script src="/static/js/jquery.min.js" type="text/javascript"></script>
+<script>
+     $(function () {
+        query()
+         $('#updateDiv').hide()
+    })
+
+    function query () {
+    $.getJSON('/user/',function (data) {
+       if(data.state =='ok'){
+           $('#userData').html('');
+           console.log('刷新了');
+           for(var i=0;i<data.date.length;i++){
+               user =data.date[i];
+               $('#userData').append('<li>'+user.id+':'+user.name+'<button onclick="delUser('+user.id+')">删除</button></li>')
+           }
+       }
+    })
+
+        }
+    function addUser() {
+
+        //通过AJAX的方式上传表单数据
+        $.ajax('/user/',{
+            type:'POST',
+            data:$('form').serialize(),
+            dataType : 'json',//响应数据类型
+            success:function (data) {
+
+                 query();
+
+                alert(data.msg)
+            }
+        })
+    }
+
+
+    function delUser(id) {
+        $.ajax('/user/?id='+id,{
+            type:'DELETE',
+
+            dataType:'json',
+            success:function (data) {
+
+                alert(data.msg);
+                  query()//重新加载
+            }
+
+        });
+    }
+    function searchUser(key) {
+
+        $.ajax('/user/?key='+key, {
+            type:'GET',
+            dataType:'json',
+            success:function (data) {
+                alert(data.msg);
+                console.log(data.data);
+                console.log(data.state,data.msg)
+                $('#updataForm >input[name="name"]').val(data.data.name);
+                $("#updataForm>input[name='id']").val(data.data.id);
+                $('#updateDiv').show()
+
+            }
+        })
+    }
+    function putUser() {
+        $.ajax('/user/',{
+            // 提交方式是POST
+            type:'put',
+            //序列化表单内容
+            data:$('#updataForm').serialize(),
+            //数据传输格式是JSON
+            dataType :'json',
+            //传输成功的话从后台获取json数据
+            success:function (data) {
+                //得到json数据并执行向应的方法
+                alert(data.msg);
+                //重新加载，重新获取ajax数据
+                query()
+            $('#updateDiv').hide()
+            }
+
+
+        })
+    }
+</script>
+</body>
+</html>

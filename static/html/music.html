@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的音乐</title>
+</head>
+<body>
+<h3>我的音乐盒</h3>
+<ul style="list-style: none" id="musicList">
+
+</ul>
+<script src="/static/js/jquery.min.js"></script>
+<script>
+    $(function () {
+        query()
+    })
+
+    function query() {
+        $.getJSON('/music/',function (data) {
+            console.log(data)
+            for(var i=0;i<data.data.length;i++){
+                var li="<li>音乐名："+data.data[i].name+"歌手"+data.data[i].singer+"</li>";
+                $('#musicList').append(li)
+            }
+
+        })
+    }
+</script>
+</body>
+</html>
